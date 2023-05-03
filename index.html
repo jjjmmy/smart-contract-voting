@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Voting Application</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="web3.min.js"></script>
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <h1>Voting Application</h1>
+    <h2>Candidates</h2>
+    <ul id="candidate-list"></ul>
+    <form id="add-candidate-form">
+        <h3>Add Candidate</h3>
+        <label>Name:</label>
+        <input type="text" name="name" required>
+        <label>Manifesto:</label>
+        <textarea name="manifesto" required></textarea>
+        <input type="submit" value="Add Candidate">
+    </form>
+    <form id="vote-form">
+        <h3>Vote</h3>
+        <label>Candidate:</label>
+        <select name="candidateId" required></select>
+        <label>Ether:</label>
+        <input type="number" name="etherAmount" step="0.0001" min="1" required>
+        <input type="submit" value="Vote">
+    </form>
+    <h2>Total Vote Count</h2>
+    <p id="total-vote-count"></p>
+    <script>
+        window.addEventListener('load', async () => {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+                    // Acccounts now exposed
+                    web3.eth.sendTransaction({/* ... */ });
+                } catch (error) {
+                    // User denied account access...
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                // Acccounts always exposed
+                web3.eth.sendTransaction({/* ... */ });
+            }
+            // Non-dapp browsers...
+            else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+            }
+
+            const App = new window.web3.eth.Contract(AppAbi, AppAddress);
+
+            // display list of candidates
+            const candidateList = document.getElementById('candidate-list');
+            const candidates = await App.methods.getCandidates().call();
+            for (let i = 0; i < candidates.length; i++) {
+                const candidate = await App.methods.getCandidate(candidates[i]).call();
+                const li = document.createElement('li');
+                li.innerHTML = `${candidate.name} (${candidate.voteCount} votes)`;
+                candidateList.appendChild(li);
+            }
+
+            // display total vote count
+            const totalVoteCount = document.getElementById('total-vote-count');
+            const voteCount = await App.methods.getTotalVoteCount().call();
+            totalVoteCount.innerHTML = `${voteCount} total votes`;
+
+            // display candidate select options
+            const candidateSelect = document.querySelector('select[name="candidateId"]');
+            for (let i = 0; i < candidates.length; i++) {
+                const candidate = await App.methods.getCandidate(candidates[i]).call();
+                const option = document.createElement('option');
+                option.value = candidate.id;
+                option.innerHTML = candidate.name;
+                candidateSelect.appendChild(option);
+            }
+
+            // add candidate form submit event
+            const addCandidateForm = document.getElementById('add-candidate-form');
+            addCandidateForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const name = event.target.elements.name.value;
+                const manifesto = event.target.elements.manifesto.value;
+                await App.methods.addCandidate(name, manifesto).send({ from: web3.eth.defaultAccount });
+                location.reload(); // refresh the page after adding a candidate
+            })
+        });
