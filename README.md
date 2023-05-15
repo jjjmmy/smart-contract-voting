@@ -1,8 +1,4 @@
-# smart-contract-voting
-
-README for the Voting Application HTML file and JavaScript code:
-
-# Voting Application
+# Smart Contract Voting
 
 This is a simple web application built with HTML, CSS, and JavaScript that allows users to vote for candidates and add new candidates to the list.
 
