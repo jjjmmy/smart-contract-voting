@@ -20,4 +20,4 @@ This application requires the `web3` library to interact with the Ethereum block
 
 ## Credits
 
-This application was created by [Your Name] for [Your Company]. Feel free to modify and distribute the code as you wish.
+This application was created by jjjmmy. Feel free to modify and distribute the code as you wish.
